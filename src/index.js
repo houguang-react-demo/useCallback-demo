@@ -1,34 +1,46 @@
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import ReactDOM from 'react-dom';
 
-
-const App = () => {
-  
+const set = new Set()
+const set2 = new Set()
+const Callback = () => {
   const [count, setCount] = useState(1);
-  const [val, setValue] = useState('');
+  const [state, setState] = useState(1);
+  const [val, setVal] = useState("");
   
-  const expensive = useMemo(() => {
-    console.log('compute');
-    let sum = 0;
-    for (let i = 0; i < count * 100; i++) {
-      sum += i;
-    }
-    return sum;
-  },[count])
+  const callback = useCallback(
+    () => {
+      console.log(count)
+    },
+    [count],
+  );
+  set.add(callback)
+  
+  const callback1 = () => {
+    console.log(state)
+  }
+  set2.add(callback1)
   
   return <div>
-    <h4>{count}-{val}-{expensive}</h4>
     <div>
-      <button onClick={() => setCount(count + 1)}>按钮</button>
-      {/*未使用Memo时，修改val时expensive也会重新渲染,使用useMemo时，修改val时，不会重新渲染expensive*/}
-      <input value={val} onChange={event => setValue(event.target.value)}/>
+      <h4>{count}</h4>
+      <h4>{set.size}</h4>
+      {/*使用useCallback时，useCallback返回函数的缓存,组件重新渲染时，依赖的值没有变化时不会重新生成函数*/}
+      <button onClick={() => setCount(count + 1)}>按钮1</button>
+    </div>
+    <hr/>
+    <div>
+      <h4>{state}</h4>
+      <h4>{set2.size}</h4>
+      {/*未使用useCallback时，组件重新渲染时会重新生成函数，set2.add为插入*/}
+      <button onClick={()=>setState(state+1)}>按钮2</button>
+      <input value={val} onChange={event => setVal(event.target.value)}/>
     </div>
   </div>;
-  
 }
 
 ReactDOM.render(
-  <><App/></>
+  <><Callback/></>
   ,
   document.getElementById('root')
 );
